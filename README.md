@@ -1,5 +1,6 @@
 [![Build status](https://travis-ci.org/dcache-elements/dcache-namespace.svg?branch=master)](https://travis-ci.org/dcache-elements/dcache-namespace)
-_[Demo and API docs](https://dcache-elements.github.io/dcache-namespace/components/create-namespace/)_
+
+_[Demo and API docs](https://dcache-elements.github.io/dcache-namespace/components/dcache-namespace/)_
 
 # \<dcache-namespace\>
 
@@ -36,5 +37,6 @@ inside dcache:
     });
 ```
 
-**TO-DO**
-1. add unit test
+**Task list**
+
+- [ ] add unit test
