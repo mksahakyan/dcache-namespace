@@ -1,0 +1,204 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
+
+<!--
+`dcache-namespace`
+dcache-namespace can be used to perform an ajax call to create a new directory
+using dcache restful-api.
+
+*A model adapted from iron-request element of Google Polymer.*
+
+@demo demo/index.html 
+-->
+
+<dom-module id="dcache-namespace">
+  <script>
+    Polymer({
+
+      is: 'dcache-namespace',
+
+      hostAttributes: {
+        hidden: true
+      },
+
+      properties: {
+      /**
+        * A reference to the XMLHttpRequest instance used to generate the
+        * network request.
+        *
+        * @type {XMLHttpRequest}
+        */
+        xhr: {
+          type: Object,
+          notify: true,
+          readOnly: true,
+          value: function() {
+            return new XMLHttpRequest();
+          }
+        },
+
+        /**
+          * A reference to the parsed response body, if the `xhr` has completely
+          * resolved.
+          *
+          * @type {*}
+          * @default null
+          */
+        response: {
+          type: Object,
+          notify: true,
+          readOnly: true,
+          value: function() {
+            return null;
+          }
+        },
+
+        /**
+          * A reference to the status code, if the `xhr` has completely resolved.
+          */
+        status: {
+          type: Number,
+          notify: true,
+          readOnly: true,
+          value: 0
+        },
+
+        /**
+          * A promise that resolves when the `xhr` response comes back, or rejects
+          * if there is an error before the `xhr` completes.
+          *
+          * @type {Promise}
+          */
+        promise: {
+          type: Object,
+          readOnly: true,
+          notify: true,
+          value: function() {
+            return new Promise(function (resolve, reject) {
+              this.resolvePromise = resolve;
+              this.rejectPromise = reject;
+            }.bind(this));
+          },
+        },
+
+        /**
+          * Errored will be true if the browser fired an error event from the
+          * XHR object (mainly network errors).
+          */
+        errored: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+          value: false
+        },
+
+        /**
+          *
+          * @type {String}
+          * @default {window.btoa(nobody:nopassword)}
+          */
+        auth: {
+          type: String,
+          value: 'YW5vbnltb3VzOm5vcGFzc3dvcmQ='
+        }
+          
+      },
+
+      /**
+        * Succeeded is true if the request succeeded. The request succeeded if it
+        * loaded without error, wasn't aborted, and the status code is ≥ 200, and
+        * < 300.
+        *
+        * @return {boolean}
+        */
+      get succeeded() {
+        if (this.errored) {
+          return false;
+        }
+        var status = this.xhr.status;
+        if (status >= 200 && status < 300) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+
+      mkdir: function (options) 
+      {
+        var xhr = this.xhr;
+        var auth = this.auth;
+
+        var name = options.name;
+        var url = options.url;
+        
+        var body = '{"action": "mkdir", "name": "'+ name +'"}';
+        var method = 'POST';   
+
+        xhr.open(
+          method, 
+          url, 
+          true
+        );
+        xhr.responseType = 'json';
+
+        xhr.addEventListener('error', function (error) {
+          this._setErrored(true);
+          this._updateStatus();
+          this.rejectPromise(error);
+        }.bind(this));
+
+        xhr.addEventListener('loadend', function () {
+          this._updateStatus();
+          this._setResponse(this.parseResponse());
+          if (!this.succeeded) {
+            this.rejectPromise(new Error('The request failed with status code: ' + this.xhr.status + '.'));
+            return;
+          }
+          this.resolvePromise(this);
+        }.bind(this));
+
+        xhr.setRequestHeader("Content-type", "application/json");
+				xhr.setRequestHeader("Authorization", auth);
+				xhr.setRequestHeader("Accept", "application/json");
+        xhr.send(body);
+        
+        return this.promise;
+
+      },
+
+      /**
+        * Attempts to parse the response body of the XHR. If parsing succeeds,
+        * the value returned will be deserialized based on the `responseType`
+        * set on the XHR.
+        *
+        * @return {*} The parsed response,
+        * or undefined if there was an empty response or parsing failed.
+        */
+      parseResponse: function () {
+        var xhr = this.xhr;
+        var responseType = xhr.responseType || xhr._responseType;
+        var preferResponseText = !this.xhr.responseType;
+        try {
+          if (preferResponseText || xhr.response === undefined) {
+            try {
+              return JSON.parse(xhr.responseText);
+            } catch (_) {
+              return null;
+            }
+          }
+          return xhr.response;
+        } catch (e) {
+          this.rejectPromise(new Error('Could not parse response. ' + e.message));
+        }
+      },
+
+      /**
+        * Updates the status code.
+        */
+      _updateStatus: function() {
+        this._setStatus(this.xhr.status);
+      }
+
+    });
+  </script>
+</dom-module>
