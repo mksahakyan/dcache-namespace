@@ -3,10 +3,22 @@
 
 <!--
 `dcache-namespace`
-dcache-namespace can be used to perform an ajax call to create a new directory
-using dcache restful-api.
+dcache-namespace can be used to perform an ajax call to create a new directory, 
+move or rename a file using dcache restful-api.
 
-*A model adapted from iron-request element of Google Polymer.*
+### usage:
+
+```html
+  <dcache-namespace id="namespace" auth="..."></dcache-namespace>
+```
+...
+```javascript
+var url = ...;
+var dest = ...;
+this.$.namespace.mv({url: url, destination: dest});
+```
+
+_A model adapted from iron-request element of Google Polymer._
 
 @demo demo/index.html 
 -->
@@ -123,20 +135,24 @@ using dcache restful-api.
         }
       },
 
-      mkdir: function (options) 
+      /*
+       * @return {Promise}
+       */
+      _send: function(options, action)
       {
         var xhr = this.xhr;
         var auth = this.auth;
+        var body;
 
-        var name = options.name;
-        var url = options.url;
-        
-        var body = '{"action": "mkdir", "name": "'+ name +'"}';
-        var method = 'POST';   
+        if (action == 'mkdir') {
+          body = '{"action": "mkdir", "name": "'+ options.name +'"}';
+        } else if (action == 'mv') {
+          body = '{"action": "mv", "destination": "'+ options.destination +'"}';
+        }
 
         xhr.open(
-          method, 
-          url, 
+          'POST', 
+          options.url, 
           true
         );
         xhr.responseType = 'json';
@@ -163,7 +179,41 @@ using dcache restful-api.
         xhr.send(body);
         
         return this.promise;
+      },
 
+      /*
+       * ### Performs an AJAX request to create a new folder.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: The url of dcache restful-api with the path to where the 
+       *      the new directory should be created. 
+       *
+       *    `name`: The name of the new directory.
+       *
+       */
+      mkdir: function (options) 
+      {
+        var action = 'mkdir';
+        this._send(options, action);
+      },
+
+      /*
+       * ### Performs an AJAX request to rename or move a file.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: The url of dcache restful-api with the path to where the 
+       *      the file or directory you want to rename or move.
+       *
+       *    `destination`: Specify the new name of the file or the full path 
+       *      to where the file should be moved.
+       *
+       */
+      mv: function(options)
+      {
+        var action = 'mv';
+        this._send(options, action);
       },
 
       /**
