@@ -148,10 +148,13 @@ _A model adapted from iron-request element of Google Polymer._
           body = '{"action": "mkdir", "name": "'+ options.name +'"}';
         } else if (action == 'mv') {
           body = '{"action": "mv", "destination": "'+ options.destination +'"}';
+        } else if (action == 'delete') {
+          body = null;
+          options.method = 'DELETE';
         }
 
         xhr.open(
-          'POST', 
+          options.method || 'POST',
           options.url, 
           true
         );
@@ -176,6 +179,7 @@ _A model adapted from iron-request element of Google Polymer._
         xhr.setRequestHeader("Content-type", "application/json");
 				xhr.setRequestHeader("Authorization", auth);
 				xhr.setRequestHeader("Accept", "application/json");
+
         xhr.send(body);
         
         return this.promise;
@@ -185,8 +189,8 @@ _A model adapted from iron-request element of Google Polymer._
        * ### Performs an AJAX request to create a new folder.
        *
        * @param {{
-       *  options: (object)}} options - 
-       *    `url`: The url of dcache restful-api with the path to where the 
+       *  options: (object)}} options -
+       *    `url`: The url of dcache restful-api with the path to where the
        *      the new directory should be created. 
        *
        *    `name`: The name of the new directory.
@@ -213,6 +217,21 @@ _A model adapted from iron-request element of Google Polymer._
       mv: function(options)
       {
         var action = 'mv';
+        this._send(options, action);
+      },
+
+      /*
+       * ### Performs an AJAX request to rename or move a file.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: The url of dcache restful-api with the path to where 
+       *      the file you want to delete is located
+       *
+       */
+      delete: function(options)
+      {
+        var action = "delete";
         this._send(options, action);
       },
 
