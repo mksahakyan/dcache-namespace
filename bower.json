@@ -1,6 +1,6 @@
 {
   "name": "dcache-namespace",
-  "description": "A javascript class created for dcache-view and which main purpose is to create new forlder in dcache.",
+  "description": "A javascript class created for dcache-view and which main purpose is to make an ajax call to dcache.",
   "main": "dcache-namespace.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
