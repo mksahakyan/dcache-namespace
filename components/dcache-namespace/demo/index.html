@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <title>dcache-namespace demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    
+    <link rel="import" href="../dcache-namespace.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+    </style>
+  </head>
+  <body>
+
+    <div class="vertical-section-container centered">
+      <h3>Demo: Use <code>dcache-namespace</code> element to create new folder</h3>
+      <demo-snippet>
+        <template>
+          <div>
+            <label>Username: </label>
+            <input id="username" type="text" name="username" value="nobody">
+            <div style="margin-top:5px"></div>
+            <label>Password: </label>
+            <input id="password" type="password" name="password" value="password">
+          </div>
+          <br>
+          <hr>
+          <div>
+            <label>Directory Name: </label>
+            <input id="dirName" type="text">
+          </div>
+          <br>
+          <div>
+            <label>URL + path: </label>
+            <input id="url" style="width:340px;" type="text" value="https://prometheus.desy.de:3880/api/v1/namespace/">
+          </div>
+          <br>
+          <button onclick="create()">Create Directory</button>
+          <br>
+          <hr>
+          <p>Result:</p>
+          <div style="margin-top:5px;height:60px;border:solid 1px #ddd;background:#ccc;">
+            <div style="margin-left:10px;">
+              <code id="result"></code>
+            </div>
+          </div>
+          
+          <script>
+            function create() {
+              var namespace = document.createElement('dcache-namespace');
+              var folderName = document.getElementById('dirName').value;
+              var username = document.getElementById('username').value;
+              var password = document.getElementById('password').value;
+              var url = document.getElementById('url').value;
+              var auth = window.btoa(username +':' + password);
+
+              namespace.auth = auth;
+
+              namespace.promise.then(
+                function(req) {
+                  document.getElementById('result').innerHTML = req.response.status;
+                }
+              ).catch(
+                function(err) {
+                  document.getElementById('result').innerHTML = err;
+                }
+              );
+
+              namespace.mkdir({
+                url: url, 
+                name: folderName
+              });
+            }            
+          </script>
+        </template>
+      </demo-snippet>
+    </div>
+
+
+    <div class="vertical-section-container centered">
+      <h3>Demo: Use <code>dcache-namespace</code> element to list a file metadata</h3>
+      <demo-snippet>
+        <template>
+          <div>
+            <label>File Path: </label>
+            <input id="path" type="text">
+          </div>
+          <br>
+          <div>
+            <label>URL</label>
+            <input id="resturl" style="width:340px;" type="text" value="https://prometheus.desy.de:3880">
+          </div>
+          <br>
+          <button onclick="list()">List</button>
+          <br>
+          
+          <script>
+            function list() {
+              var namespace = document.createElement('dcache-namespace');
+              var path = document.getElementById('path').value;
+              var username = document.getElementById('username').value;
+              var password = document.getElementById('password').value;
+              var resturl = document.getElementById('resturl').value;
+              var auth = window.btoa(username +':' + password);
+              namespace.auth = auth;
+
+              namespace.promise.then(
+                function(req) {
+                  console.log(req.response);
+                }
+              ).catch(
+                function(err) {
+                  console.log(err);
+                }
+              );
+
+              namespace.ls({
+                url: resturl,
+                path: path,
+                children: true,
+                locality: true
+              });
+            }            
+          </script>
+        </template>
+      </demo-snippet>
+    </div>
+
+  </body>
+</html>

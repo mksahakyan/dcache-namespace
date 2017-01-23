@@ -1,0 +1,318 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
+
+<!--
+`dcache-namespace`
+dcache-namespace can be used to perform an ajax call to create a new directory, 
+move or rename a file using dcache restful-api.
+
+### usage:
+
+```html
+  <dcache-namespace id="namespace" auth="..."></dcache-namespace>
+```
+...
+```javascript
+var url = ...;
+var dest = ...;
+this.$.namespace.mv({url: url, destination: dest});
+```
+
+_A model adapted from iron-request element of Google Polymer._
+
+@demo demo/index.html 
+-->
+
+<dom-module id="dcache-namespace">
+  <script>
+    Polymer({
+
+      is: 'dcache-namespace',
+
+      hostAttributes: {
+        hidden: true
+      },
+
+      properties: {
+      /**
+        * A reference to the XMLHttpRequest instance used to generate the
+        * network request.
+        *
+        * @type {XMLHttpRequest}
+        */
+        xhr: {
+          type: Object,
+          notify: true,
+          readOnly: true,
+          value: function() {
+            return new XMLHttpRequest();
+          }
+        },
+
+        /**
+          * A reference to the parsed response body, if the `xhr` has completely
+          * resolved.
+          *
+          * @type {*}
+          * @default null
+          */
+        response: {
+          type: Object,
+          notify: true,
+          readOnly: true,
+          value: function() {
+            return null;
+          }
+        },
+
+        /**
+          * A reference to the status code, if the `xhr` has completely resolved.
+          */
+        status: {
+          type: Number,
+          notify: true,
+          readOnly: true,
+          value: 0
+        },
+
+        /**
+          * A promise that resolves when the `xhr` response comes back, or rejects
+          * if there is an error before the `xhr` completes.
+          *
+          * @type {Promise}
+          */
+        promise: {
+          type: Object,
+          readOnly: true,
+          notify: true,
+          value: function() {
+            return new Promise(function (resolve, reject) {
+              this.resolvePromise = resolve;
+              this.rejectPromise = reject;
+            }.bind(this));
+          },
+        },
+
+        /**
+          * Errored will be true if the browser fired an error event from the
+          * XHR object (mainly network errors).
+          */
+        errored: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+          value: false
+        },
+
+        /**
+          *
+          * @type {String}
+          * @default {window.btoa(nobody:nopassword)}
+          */
+        auth: {
+          type: String,
+          value: 'YW5vbnltb3VzOm5vcGFzc3dvcmQ='
+        }
+          
+      },
+
+      /**
+        * Succeeded is true if the request succeeded. The request succeeded if it
+        * loaded without error, wasn't aborted, and the status code is ≥ 200, and
+        * < 300.
+        *
+        * @return {boolean}
+        */
+      get succeeded() {
+        if (this.errored) {
+          return false;
+        }
+        var status = this.xhr.status;
+        if (status >= 200 && status < 300) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+
+      /*
+       * @return {Promise}
+       */
+      _send: function(options, action)
+      {
+        var xhr = this.xhr;
+        var auth = this.auth;
+        var body;
+
+        if (action == 'mkdir') {
+          body = '{"action": "mkdir", "name": "'+ options.name +'"}';
+        } else if (action == 'mv') {
+          body = '{"action": "mv", "destination": "'+ options.destination +'"}';
+        } else if (action == 'delete') {
+          body = null;
+          options.method = 'DELETE';
+        }
+
+        xhr.open(
+          options.method || 'POST',
+          options.url, 
+          true
+        );
+        xhr.responseType = 'json';
+
+        xhr.addEventListener('error', function (error) {
+          this._setErrored(true);
+          this._updateStatus();
+          this.rejectPromise(error);
+        }.bind(this));
+
+        xhr.addEventListener('loadend', function () {
+          this._updateStatus();
+          this._setResponse(this.parseResponse());
+          if (!this.succeeded) {
+            this.rejectPromise(new Error('The request failed with status code: ' + this.xhr.status + '.'));
+            return;
+          }
+          this.resolvePromise(this);
+        }.bind(this));
+
+        xhr.setRequestHeader("Content-type", "application/json");
+				xhr.setRequestHeader("Authorization", auth);
+				xhr.setRequestHeader("Accept", "application/json");
+
+        xhr.send(body);
+        
+        return this.promise;
+      },
+
+      /*
+       * ### Performs an AJAX request to create a new folder.
+       *
+       * @param {{
+       *  options: (object)}} options -
+       *    `url`: The url of dcache restful-api with the path to where the
+       *      the new directory should be created. 
+       *
+       *    `name`: The name of the new directory.
+       *
+       */
+      mkdir: function (options) 
+      {
+        var action = 'mkdir';
+        this._send(options, action);
+      },
+
+      /*
+       * ### Performs an AJAX request to rename or move a file.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: The url of dcache restful-api with the path to where the 
+       *      the file or directory you want to rename or move.
+       *
+       *    `destination`: Specify the new name of the file or the full path 
+       *      to where the file should be moved.
+       *
+       */
+      mv: function(options)
+      {
+        var action = 'mv';
+        this._send(options, action);
+      },
+
+      /*
+       * ### Performs an AJAX request to rename or move a file.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: The url of dcache restful-api with the path to where 
+       *      the file you want to delete is located
+       *
+       */
+      delete: function(options)
+      {
+        var action = "delete";
+        this._send(options, action);
+      },
+
+      /*
+       * ### Performs an AJAX request to get the metadata of a file.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: (String) The url of dcache restful-api.
+       *
+       *    `path`: (String) The path to the file you want to get it metadata.
+       *
+       *    `children`: (Boolean) Specify whether to list the children of the specified 
+       *        file path. Default to false
+       *
+       *    `locality`: (Boolean) If true, the locality of the file children will be 
+       *        added to the returned file metadata. Default to false
+       *
+       *    `limit`: (Number) Default to null
+       *
+       *    `offset`: (Number) Default to null
+       *
+       */
+      ls: function(options)
+      {
+        if (options.path !=null && !options.path.startsWith('/')) {
+          console.error('Request not send... Ensure that the path start with forward slash.');
+          return;
+        }
+        if (options.url == null) {
+          console.error('Request not send... url must be specified.');
+          return;
+        }
+        
+        var query = '';
+        query = options.path == null ? '/': options.path;
+        query = query.endsWith('/') ? query : query + '/';
+        query = options.children == true ? query + '?children=true': query + '?children=false';
+        query = options.locality == true ? query + '&locality=true': query + '&locality=false';
+        query = options.limit == null ? query: query+'&limit='+options.limit;
+        query = options.offset == null ? query: query+'&offset='+options.offset;
+
+        var url = options.url.endsWith('/') ? 
+                  options.url+'api/v1/namespace'+query : options.url+'/api/v1/namespace'+query;
+        var opt = {method:'GET', url: url}
+        this._send(opt, 'ls');
+      },
+
+      /**
+        * Attempts to parse the response body of the XHR. If parsing succeeds,
+        * the value returned will be deserialized based on the `responseType`
+        * set on the XHR.
+        *
+        * @return {*} The parsed response,
+        * or undefined if there was an empty response or parsing failed.
+        */
+      parseResponse: function () {
+        var xhr = this.xhr;
+        var responseType = xhr.responseType || xhr._responseType;
+        var preferResponseText = !this.xhr.responseType;
+        try {
+          if (preferResponseText || xhr.response === undefined) {
+            try {
+              return JSON.parse(xhr.responseText);
+            } catch (_) {
+              return null;
+            }
+          }
+          return xhr.response;
+        } catch (e) {
+          this.rejectPromise(new Error('Could not parse response. ' + e.message));
+        }
+      },
+
+      /**
+        * Updates the status code.
+        */
+      _updateStatus: function() {
+        this._setStatus(this.xhr.status);
+      }
+
+    });
+  </script>
+</dom-module>
