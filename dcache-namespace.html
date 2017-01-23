@@ -235,6 +235,51 @@ _A model adapted from iron-request element of Google Polymer._
         this._send(options, action);
       },
 
+      /*
+       * ### Performs an AJAX request to get the metadata of a file.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: (String) The url of dcache restful-api.
+       *
+       *    `path`: (String) The path to the file you want to get it metadata.
+       *
+       *    `children`: (Boolean) Specify whether to list the children of the specified 
+       *        file path. Default to false
+       *
+       *    `locality`: (Boolean) If true, the locality of the file children will be 
+       *        added to the returned file metadata. Default to false
+       *
+       *    `limit`: (Number) Default to null
+       *
+       *    `offset`: (Number) Default to null
+       *
+       */
+      ls: function(options)
+      {
+        if (options.path !=null && !options.path.startsWith('/')) {
+          console.error('Request not send... Ensure that the path start with forward slash.');
+          return;
+        }
+        if (options.url == null) {
+          console.error('Request not send... url must be specified.');
+          return;
+        }
+        
+        var query = '';
+        query = options.path == null ? '/': options.path;
+        query = query.endsWith('/') ? query : query + '/';
+        query = options.children == true ? query + '?children=true': query + '?children=false';
+        query = options.locality == true ? query + '&locality=true': query + '&locality=false';
+        query = options.limit == null ? query: query+'&limit='+options.limit;
+        query = options.offset == null ? query: query+'&offset='+options.offset;
+
+        var url = options.url.endsWith('/') ? 
+                  options.url+'api/v1/namespace'+query : options.url+'/api/v1/namespace'+query;
+        var opt = {method:'GET', url: url}
+        this._send(opt, 'ls');
+      },
+
       /**
         * Attempts to parse the response body of the XHR. If parsing succeeds,
         * the value returned will be deserialized based on the `responseType`

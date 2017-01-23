@@ -80,5 +80,55 @@
       </demo-snippet>
     </div>
 
+
+    <div class="vertical-section-container centered">
+      <h3>Demo: Use <code>dcache-namespace</code> element to list a file metadata</h3>
+      <demo-snippet>
+        <template>
+          <div>
+            <label>File Path: </label>
+            <input id="path" type="text">
+          </div>
+          <br>
+          <div>
+            <label>URL</label>
+            <input id="resturl" style="width:340px;" type="text" value="https://prometheus.desy.de:3880">
+          </div>
+          <br>
+          <button onclick="list()">List</button>
+          <br>
+          
+          <script>
+            function list() {
+              var namespace = document.createElement('dcache-namespace');
+              var path = document.getElementById('path').value;
+              var username = document.getElementById('username').value;
+              var password = document.getElementById('password').value;
+              var resturl = document.getElementById('resturl').value;
+              var auth = window.btoa(username +':' + password);
+              namespace.auth = auth;
+
+              namespace.promise.then(
+                function(req) {
+                  console.log(req.response);
+                }
+              ).catch(
+                function(err) {
+                  console.log(err);
+                }
+              );
+
+              namespace.ls({
+                url: resturl,
+                path: path,
+                children: true,
+                locality: true
+              });
+            }            
+          </script>
+        </template>
+      </demo-snippet>
+    </div>
+
   </body>
 </html>
