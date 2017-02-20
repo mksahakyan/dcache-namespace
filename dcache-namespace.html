@@ -302,7 +302,7 @@ _A model adapted from iron-request element of Google Polymer._
         precondition.checkArgument(options.url!=null,"Please specify the restful-api path");
         precondition.checkArgument(options.path!=null,"Please specify the file full path.");
         precondition.checkArgument(options.target!=null,"Please specify the qos target.");
-        opt.url = options.url + options.path +"?qos=true";
+        opt.url = options.url + options.path;
         opt.target = options.target;
         this._send(opt, 'qos');
       },
