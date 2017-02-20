@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
+<link rel="import" href="../util-precondition/precondition.js">
 
 <!--
 `dcache-namespace`
@@ -151,6 +152,10 @@ _A model adapted from iron-request element of Google Polymer._
         } else if (action == 'delete') {
           body = null;
           options.method = 'DELETE';
+        } else if (action == "qos") {
+          body = '{"action": "qos", "target": "'+ options.target +'"}';
+        } else if (action == "getqos") {
+          body = null;
         }
 
         xhr.open(
@@ -278,6 +283,49 @@ _A model adapted from iron-request element of Google Polymer._
                   options.url+'api/v1/namespace'+query : options.url+'/api/v1/namespace'+query;
         var opt = {method:'GET', url: url}
         this._send(opt, 'ls');
+      },
+
+      /*
+       * ### Performs an AJAX request to modify the qos of a file.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: (String) The url of dcache restful-api with the path to where 
+       *      the file in which you want to modify is qos.
+       *
+       *    `path`: (String) The full path of the file that will be modified.
+       *
+       *    `target`: (String) The qos target to modify to.
+       */
+      qos: function(options)
+      {
+        precondition.checkArgument(options.url!=null,"Please specify the restful-api path");
+        precondition.checkArgument(options.path!=null,"Please specify the file full path.");
+        precondition.checkArgument(options.target!=null,"Please specify the qos target.");
+        opt.url = options.url + options.path +"?qos=true";
+        opt.target = options.target;
+        this._send(opt, 'qos');
+      },
+
+      /*
+       * ### Performs an AJAX request to modify the qos of a file.
+       *
+       * @param {{
+       *  options: (object)}} options - 
+       *    `url`: (String) The url of dcache restful-api with the path to where 
+       *      the file in which you want to get is current qos.
+       *
+       *    `path`: (String) The full path of the file that the current qos will
+       *      will be returned.
+       *
+       */
+      getqos: function(options)
+      {
+        precondition.checkArgument(options.url!=null,"Please specify the restful-api path");
+        precondition.checkArgument(options.path!=null,"Please specify the file full path.");
+        opt.method = 'GET';
+        opt.url = options.url + options.path +"?qos=true";
+        this._send(opt, 'qos');
       },
 
       /**

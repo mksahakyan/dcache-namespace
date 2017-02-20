@@ -4,7 +4,8 @@
   "main": "dcache-namespace.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
-    "promise-polyfill": "polymerlabs/promise-polyfill#^1.0.0"
+    "promise-polyfill": "polymerlabs/promise-polyfill#^1.0.0",
+    "util-precondition": "femiadeyemi/util-precondition#^0.0.1"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
