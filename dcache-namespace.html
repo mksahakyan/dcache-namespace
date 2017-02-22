@@ -1,6 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
-<link rel="import" href="../util-precondition/precondition.js">
+<script src="../util-precondition/precondition.js"></script>
 
 <!--
 `dcache-namespace`
@@ -195,16 +195,26 @@ _A model adapted from iron-request element of Google Polymer._
        *
        * @param {{
        *  options: (object)}} options -
-       *    `url`: The url of dcache restful-api with the path to where the
-       *      the new directory should be created. 
+       *    `url`: The url of dcache restful-api. 
+       *
+       *    `path`: (String) The full path to where the new directory  
+       *      should be created.
        *
        *    `name`: The name of the new directory.
        *
        */
       mkdir: function (options) 
       {
-        var action = 'mkdir';
-        this._send(options, action);
+        try {
+          precondition.checkArgument(options.name!=undefined || options.name!=null || options.name!="", 
+            "Please provide the name of the new directory.");
+          let opt = {};
+          opt.url = this._appendFullPathToUrl(options.url, options.path);
+          opt.name = options.name;
+          this._send(opt, "mkdir");
+        } catch (e) {
+          this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
+        }
       },
 
       /*
@@ -212,17 +222,27 @@ _A model adapted from iron-request element of Google Polymer._
        *
        * @param {{
        *  options: (object)}} options - 
-       *    `url`: The url of dcache restful-api with the path to where the 
-       *      the file or directory you want to rename or move.
+       *    `url`: (String) The url with the dcache restful-api path
        *
-       *    `destination`: Specify the new name of the file or the full path 
+       *    `path`: (String) The full path to where the file you want to delete is 
+       *      located
+       *
+       *    `destination`: (String) Specify the new name of the file or the full path 
        *      to where the file should be moved.
        *
        */
       mv: function(options)
       {
-        var action = 'mv';
-        this._send(options, action);
+        try {
+          precondition.checkArgument(options.destination!=undefined || 
+            options.destination!=null || options.destination!="", "Please provide the destination.");
+          let opt = {};
+          opt.url = this._appendFullPathToUrl(options.url, options.path);
+          opt.destination = options.destination;
+          this._send(opt, "mv");
+        } catch (e) {
+          this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
+        }
       },
 
       /*
@@ -230,14 +250,20 @@ _A model adapted from iron-request element of Google Polymer._
        *
        * @param {{
        *  options: (object)}} options - 
-       *    `url`: The url of dcache restful-api with the path to where 
-       *      the file you want to delete is located
+       *    `url`: The url with the dcache restful-api path
        *
+       *    `path`: The full path to where the file you want to delete is 
+       *      located
        */
       delete: function(options)
       {
-        var action = "delete";
-        this._send(options, action);
+        try {
+          let opt = {};
+          opt.url = this._appendFullPathToUrl(options.url, options.path);
+          this._send(opt, "delete");
+        } catch(e) {
+          this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
+        }
       },
 
       /*
@@ -262,27 +288,26 @@ _A model adapted from iron-request element of Google Polymer._
        */
       ls: function(options)
       {
-        if (options.path !=null && !options.path.startsWith('/')) {
-          console.error('Request not send... Ensure that the path start with forward slash.');
-          return;
-        }
-        if (options.url == null) {
-          console.error('Request not send... url must be specified.');
-          return;
-        }
-        
-        var query = '';
-        query = options.path == null ? '/': options.path;
-        query = query.endsWith('/') ? query : query + '/';
-        query = options.children == true ? query + '?children=true': query + '?children=false';
-        query = options.locality == true ? query + '&locality=true': query + '&locality=false';
-        query = options.limit == null ? query: query+'&limit='+options.limit;
-        query = options.offset == null ? query: query+'&offset='+options.offset;
+        //TODO: Factor this out.
+        try {
+          precondition.checkArgument(options.url!=null,"Please specify the url.");
+          precondition.checkArgument(options.path==null && options.path.startsWith('/'),
+            "Please make sure that the path start with forward slash.");
+          let query = '';
+          query = options.path == null ? '/': options.path;
+          query = query.endsWith('/') ? query : query + '/';
+          query = options.children == true ? query + '?children=true': query + '?children=false';
+          query = options.locality == true ? query + '&locality=true': query + '&locality=false';
+          query = options.limit == null ? query: query+'&limit='+options.limit;
+          query = options.offset == null ? query: query+'&offset='+options.offset;
 
-        var url = options.url.endsWith('/') ? 
-                  options.url+'api/v1/namespace'+query : options.url+'/api/v1/namespace'+query;
-        var opt = {method:'GET', url: url}
-        this._send(opt, 'ls');
+          let url = options.url.endsWith('/') ? 
+                    options.url+'api/v1/namespace'+query : options.url+'/api/v1/namespace'+query;
+          let opt = {method:'GET', url: url}
+          this._send(opt, 'ls');
+        } catch (e) {
+          this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
+        }
       },
 
       /*
@@ -299,12 +324,16 @@ _A model adapted from iron-request element of Google Polymer._
        */
       qos: function(options)
       {
-        precondition.checkArgument(options.url!=null,"Please specify the restful-api path");
-        precondition.checkArgument(options.path!=null,"Please specify the file full path.");
-        precondition.checkArgument(options.target!=null,"Please specify the qos target.");
-        opt.url = options.url + options.path;
-        opt.target = options.target;
-        this._send(opt, 'qos');
+        try {
+          precondition.checkArgument(options.target!=undefined || options.target!=null || options.target!="",
+            "Please specify the qos target.");
+          let opt = {};
+          opt.url = this._appendFullPathToUrl(options.url, options.path);
+          opt.target = options.target;
+          this._send(opt, 'qos');
+        } catch (e) {
+          this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
+        }
       },
 
       /*
@@ -321,11 +350,14 @@ _A model adapted from iron-request element of Google Polymer._
        */
       getqos: function(options)
       {
-        precondition.checkArgument(options.url!=null,"Please specify the restful-api path");
-        precondition.checkArgument(options.path!=null,"Please specify the file full path.");
-        opt.method = 'GET';
-        opt.url = options.url + options.path +"?qos=true";
-        this._send(opt, 'qos');
+        try {
+          let opt = {};
+          opt.method = 'GET';
+          opt.url = this._appendFullPathToUrl(options.url, options.path) +"?qos=true";
+          this._send(opt, 'qos');
+        } catch (e) {
+          this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
+        }
       },
 
       /**
@@ -336,7 +368,8 @@ _A model adapted from iron-request element of Google Polymer._
         * @return {*} The parsed response,
         * or undefined if there was an empty response or parsing failed.
         */
-      parseResponse: function () {
+      parseResponse: function ()
+      {
         var xhr = this.xhr;
         var responseType = xhr.responseType || xhr._responseType;
         var preferResponseText = !this.xhr.responseType;
@@ -357,10 +390,30 @@ _A model adapted from iron-request element of Google Polymer._
       /**
         * Updates the status code.
         */
-      _updateStatus: function() {
+      _updateStatus: function()
+      {
         this._setStatus(this.xhr.status);
-      }
+      },
 
+      /**
+        * append the file path to the url to form a full url.
+        *
+        * @return {urlWithFullPath}
+        */
+      _appendFullPathToUrl: function(url, path)
+      {
+        precondition.checkArgument(url!=undefined || url!=null || url!="", "Please specify the url.");
+        precondition.checkArgument(path!=undefined || path!=null || path!="", "Please specify the file full path.");
+        let urlWithFullPath = "/";
+        if (url.endsWith('/') && path.startsWith('/')) {
+          urlWithFullPath = url + path.slice(1);
+        } else if (!url.endsWith('/') && !path.startsWith('/')) {
+          urlWithFullPath = url + "/" + path;
+        } else {
+          urlWithFullPath = url + path;
+        }
+        return urlWithFullPath;
+      }
     });
   </script>
 </dom-module>
