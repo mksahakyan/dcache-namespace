@@ -33,6 +33,7 @@ inside dcache:
 
     namespace.mkdir({
       url: '/api/v1/namespace/', 
+      path: '/public', 
       name: folderName
     });
 ```

@@ -15,8 +15,9 @@ move or rename a file using dcache restful-api.
 ...
 ```javascript
 var url = ...;
+var path = ...;
 var dest = ...;
-this.$.namespace.mv({url: url, destination: dest});
+this.$.namespace.mv({url: url, path: path, destination: dest});
 ```
 
 _A model adapted from iron-request element of Google Polymer._
