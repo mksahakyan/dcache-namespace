@@ -175,7 +175,7 @@ _A model adapted from iron-request element of Google Polymer._
           this._updateStatus();
           this._setResponse(this.parseResponse());
           if (!this.succeeded) {
-            this.rejectPromise(new Error('The request failed with status code: ' + this.xhr.status + '.'));
+            this.rejectPromise(new Error('Error! ' + this.xhr.statusText + ": " + this.xhr.response.error[0].message + '.'));
             return;
           }
           this.resolvePromise(this);
