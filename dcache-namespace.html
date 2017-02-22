@@ -247,7 +247,7 @@ _A model adapted from iron-request element of Google Polymer._
       },
 
       /*
-       * ### Performs an AJAX request to rename or move a file.
+       * ### Performs an AJAX request to delete a file.
        *
        * @param {{
        *  options: (object)}} options - 
@@ -256,7 +256,7 @@ _A model adapted from iron-request element of Google Polymer._
        *    `path`: The full path to where the file you want to delete is 
        *      located
        */
-      delete: function(options)
+      rm: function(options)
       {
         try {
           let opt = {};
@@ -399,7 +399,7 @@ _A model adapted from iron-request element of Google Polymer._
       /**
         * append the file path to the url to form a full url.
         *
-        * @return {urlWithFullPath}
+        * @return {String}
         */
       _appendFullPathToUrl: function(url, path)
       {
