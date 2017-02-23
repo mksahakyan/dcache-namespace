@@ -176,7 +176,7 @@ _A model adapted from iron-request element of Google Polymer._
           this._updateStatus();
           this._setResponse(this.parseResponse());
           if (!this.succeeded) {
-            this.rejectPromise(new Error('Error! ' + this.xhr.statusText + ": " + this.xhr.response.error[0].message + '.'));
+            this.rejectPromise(new Error('Error! ' + this.xhr.statusText + ": " + this.xhr.response.errors[0].message + '.'));
             return;
           }
           this.resolvePromise(this);
@@ -226,8 +226,8 @@ _A model adapted from iron-request element of Google Polymer._
        *  options: (object)}} options - 
        *    `url`: (String) The url with the dcache restful-api path
        *
-       *    `path`: (String) The full path to where the file you want to delete is 
-       *      located
+       *    `path`: (String) The full path to where the file you want to rename or 
+       *      move is located
        *
        *    `destination`: (String) Specify the new name of the file or the full path 
        *      to where the file should be moved.
