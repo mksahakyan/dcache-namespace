@@ -207,8 +207,9 @@ _A model adapted from iron-request element of Google Polymer._
       mkdir: function (options) 
       {
         try {
-          precondition.checkArgument(options.name!=undefined || options.name!=null || options.name!="", 
+          precondition.checkArgument(options.name!=undefined || options.name!=null, 
             "Please provide the name of the new directory.");
+          precondition.checkArgument(options.name.trim().length!=0, "Directory name cannot be empty.");
           let opt = {};
           opt.url = this._appendFullPathToUrl(options.url, options.path);
           opt.name = options.name;
@@ -235,8 +236,9 @@ _A model adapted from iron-request element of Google Polymer._
       mv: function(options)
       {
         try {
-          precondition.checkArgument(options.destination!=undefined || 
-            options.destination!=null || options.destination!="", "Please provide the destination.");
+          precondition.checkArgument(options.destination!=undefined || options.destination!=null, 
+            "Please provide the destination.");
+          precondition.checkArgument(options.destination.trim().length!=0, "Destination cannot be empty.");
           let opt = {};
           opt.url = this._appendFullPathToUrl(options.url, options.path);
           opt.destination = options.destination;
@@ -291,9 +293,10 @@ _A model adapted from iron-request element of Google Polymer._
       {
         //TODO: Factor this out.
         try {
-          precondition.checkArgument(options.url!=null,"Please specify the url.");
-          precondition.checkArgument(options.path==null && options.path.startsWith('/'),
-            "Please make sure that the path start with forward slash.");
+          precondition.checkArgument(options.url!=undefined || options.url!=null, 
+            "Please specify the url.");
+          precondition.checkArgument((options.path!=undefined || options.path!=null) 
+            && options.path.startsWith('/'), "Please make sure that the path start with forward slash.");
           let query = '';
           query = options.path == null ? '/': options.path;
           query = query.endsWith('/') ? query : query + '/';
@@ -326,8 +329,9 @@ _A model adapted from iron-request element of Google Polymer._
       qos: function(options)
       {
         try {
-          precondition.checkArgument(options.target!=undefined || options.target!=null || options.target!="",
-            "Please specify the qos target.");
+          precondition.checkArgument(options.target!=undefined || options.target!=null, 
+            "Please specify the target.");
+          precondition.checkArgument(options.target.trim().length!==0, "The target cannot be empty.");
           let opt = {};
           opt.url = this._appendFullPathToUrl(options.url, options.path);
           opt.target = options.target;
@@ -403,8 +407,10 @@ _A model adapted from iron-request element of Google Polymer._
         */
       _appendFullPathToUrl: function(url, path)
       {
-        precondition.checkArgument(url!=undefined || url!=null || url!="", "Please specify the url.");
-        precondition.checkArgument(path!=undefined || path!=null || path!="", "Please specify the file full path.");
+        precondition.checkArgument(url!=undefined || url!=null, "Please specify the url.");
+        precondition.checkArgument(url.trim().length !==0, "The url cannot be empty.");
+        precondition.checkArgument(path!=undefined || path!=null, "Please specify the file full path.");
+        precondition.checkArgument(path.trim().length !==0, "The path cannot be an empty.");
         let urlWithFullPath = "/";
         if (url.endsWith('/') && path.startsWith('/')) {
           urlWithFullPath = url + path.slice(1);
