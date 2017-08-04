@@ -1,16 +1,17 @@
 {
   "name": "dcache-namespace",
-  "description": "A javascript class created for dcache-view and which main purpose is to make an ajax call to dcache.",
+  "version": "1.0.0",
+  "description": "An element for dcache-view and which main purpose is to make an ajax call to dcache.",
   "main": "dcache-namespace.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.4.0",
-    "promise-polyfill": "polymerlabs/promise-polyfill#^1.0.0",
-    "util-precondition": "femiadeyemi/util-precondition#0.0.3"
+    "polymer": "Polymer/polymer#2.0.1",
+    "promise-polyfill": "polymerlabs/promise-polyfill#2.0.1",
+    "util-precondition": "femiadeyemi/util-precondition#0.0.3",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#1.0.5"
   },
   "devDependencies": {
-    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
-    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
-    "web-component-tester": "^4.0.0",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+    "iron-component-page": "PolymerElements/iron-component-page#3.0.1",
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#2.0.0",
+    "web-component-tester": "6.0.0"
   }
 }
