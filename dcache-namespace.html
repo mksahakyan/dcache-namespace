@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
 <link rel="import" href="../util-precondition/precondition-element.html">
 
@@ -14,9 +14,9 @@ move or rename a file using dcache restful-api.
 ```
 ...
 ```javascript
-var url = ...;
-var path = ...;
-var dest = ...;
+const url = ...;
+const path = ...;
+const dest = ...;
 this.$.namespace.mv({url: url, path: path, destination: dest});
 ```
 
@@ -27,96 +27,102 @@ _A model adapted from iron-request element of Google Polymer._
 
 <dom-module id="dcache-namespace">
   <script>
-    Polymer({
+    class DcacheNamespace extends Polymer.Element
+    {
+      static get is()
+      {
+        return "dcache-namespace";
+      }
 
-      is: 'dcache-namespace',
-
-      hostAttributes: {
-        hidden: true
-      },
-
-      properties: {
-      /**
-        * A reference to the XMLHttpRequest instance used to generate the
-        * network request.
-        *
-        * @type {XMLHttpRequest}
-        */
-        xhr: {
-          type: Object,
-          notify: true,
-          readOnly: true,
-          value: function() {
-            return new XMLHttpRequest();
-          }
-        },
-
-        /**
-          * A reference to the parsed response body, if the `xhr` has completely
-          * resolved.
-          *
-          * @type {*}
-          * @default null
-          */
-        response: {
-          type: Object,
-          notify: true,
-          readOnly: true,
-          value: function() {
-            return null;
-          }
-        },
-
-        /**
-          * A reference to the status code, if the `xhr` has completely resolved.
-          */
-        status: {
-          type: Number,
-          notify: true,
-          readOnly: true,
-          value: 0
-        },
-
-        /**
-          * A promise that resolves when the `xhr` response comes back, or rejects
-          * if there is an error before the `xhr` completes.
-          *
-          * @type {Promise}
-          */
-        promise: {
-          type: Object,
-          readOnly: true,
-          notify: true,
-          value: function() {
-            return new Promise(function (resolve, reject) {
-              this.resolvePromise = resolve;
-              this.rejectPromise = reject;
-            }.bind(this));
+      static get properties()
+      {
+        return {
+          /**
+           * A reference to the XMLHttpRequest instance used to generate the
+           * network request.
+           *
+           * @type {XMLHttpRequest}
+           */
+          xhr: {
+            type: Object,
+            notify: true,
+            readOnly: true,
+            value: function() {
+              return new XMLHttpRequest();
+            }
           },
-        },
 
-        /**
-          * Errored will be true if the browser fired an error event from the
-          * XHR object (mainly network errors).
-          */
-        errored: {
-          type: Boolean,
-          notify: true,
-          readOnly: true,
-          value: false
-        },
+          /**
+           * A reference to the parsed response body, if the `xhr` has completely
+           * resolved.
+           *
+           * @type {*}
+           * @default null
+           */
+          response: {
+            type: Object,
+            notify: true,
+            readOnly: true,
+            value: function() {
+              return null;
+            }
+          },
 
-        /**
-          *
-          * @type {String}
-          * @default {window.btoa(nobody:nopassword)}
-          */
-        auth: {
-          type: String,
-          value: 'YW5vbnltb3VzOm5vcGFzc3dvcmQ='
+          /**
+           * A reference to the status code, if the `xhr` has completely resolved.
+           */
+          status: {
+            type: Number,
+            notify: true,
+            readOnly: true,
+            value: 0
+          },
+
+          /**
+           * A promise that resolves when the `xhr` response comes back, or rejects
+           * if there is an error before the `xhr` completes.
+           *
+           * @type {Promise}
+           */
+          promise: {
+            type: Object,
+            readOnly: true,
+            notify: true,
+            value: function() {
+              return new Promise(function (resolve, reject) {
+                this.resolvePromise = resolve;
+                this.rejectPromise = reject;
+              }.bind(this));
+            },
+          },
+
+          /**
+           * Errored will be true if the browser fired an error event from the
+           * XHR object (mainly network errors).
+           */
+          errored: {
+            type: Boolean,
+            notify: true,
+            readOnly: true,
+            value: false
+          },
+
+          /**
+           *
+           * @type {String}
+           * @default {window.btoa(nobody:nopassword)}
+           */
+          auth: {
+            type: String,
+            value: 'YW5vbnltb3VzOm5vcGFzc3dvcmQ='
+          }
         }
-          
-      },
+      }
+
+      ready()
+      {
+        this._ensureAttribute('hidden', true);
+      }
 
       /**
         * Succeeded is true if the request succeeded. The request succeeded if it
@@ -125,26 +131,27 @@ _A model adapted from iron-request element of Google Polymer._
         *
         * @return {boolean}
         */
-      get succeeded() {
+      get succeeded() 
+      {
         if (this.errored) {
           return false;
         }
-        var status = this.xhr.status;
+        const status = this.xhr.status;
         if (status >= 200 && status < 300) {
           return true;
         } else {
           return false;
         }
-      },
+      }
 
       /*
        * @return {Promise}
        */
-      _send: function(options, action)
+      _send(options, action)
       {
-        var xhr = this.xhr;
-        var auth = this.auth;
-        var body;
+        const xhr = this.xhr;
+        const auth = this.auth;
+        let body;
 
         if (action == 'mkdir') {
           body = '{"action": "mkdir", "name": "'+ options.name +'"}';
@@ -190,7 +197,7 @@ _A model adapted from iron-request element of Google Polymer._
         xhr.send(body);
         
         return this.promise;
-      },
+      }
 
       /*
        * ### Performs an AJAX request to create a new folder.
@@ -205,7 +212,7 @@ _A model adapted from iron-request element of Google Polymer._
        *    `name`: The name of the new directory.
        *
        */
-      mkdir: function (options) 
+      mkdir (options)
       {
         try {
           precondition.checkArgument(options.name!=undefined || options.name!=null, 
@@ -218,7 +225,7 @@ _A model adapted from iron-request element of Google Polymer._
         } catch (e) {
           this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
         }
-      },
+      }
 
       /*
        * ### Performs an AJAX request to rename or move a file.
@@ -234,7 +241,7 @@ _A model adapted from iron-request element of Google Polymer._
        *      to where the file should be moved.
        *
        */
-      mv: function(options)
+      mv(options)
       {
         try {
           precondition.checkArgument(options.destination!=undefined || options.destination!=null, 
@@ -247,7 +254,7 @@ _A model adapted from iron-request element of Google Polymer._
         } catch (e) {
           this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
         }
-      },
+      }
 
       /*
        * ### Performs an AJAX request to delete a file.
@@ -259,7 +266,7 @@ _A model adapted from iron-request element of Google Polymer._
        *    `path`: The full path to where the file you want to delete is 
        *      located
        */
-      rm: function(options)
+      rm(options)
       {
         try {
           let opt = {};
@@ -268,7 +275,7 @@ _A model adapted from iron-request element of Google Polymer._
         } catch(e) {
           this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
         }
-      },
+      }
 
       /*
        * ### Performs an AJAX request to get the metadata of a file.
@@ -290,7 +297,7 @@ _A model adapted from iron-request element of Google Polymer._
        *    `offset`: (Number) Default to null
        *
        */
-      ls: function(options)
+      ls(options)
       {
         //TODO: Factor this out.
         try {
@@ -313,7 +320,7 @@ _A model adapted from iron-request element of Google Polymer._
         } catch (e) {
           this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
         }
-      },
+      }
 
       /*
        * ### Performs an AJAX request to modify the qos of a file.
@@ -327,7 +334,7 @@ _A model adapted from iron-request element of Google Polymer._
        *
        *    `target`: (String) The qos target to modify to.
        */
-      qos: function(options)
+      qos(options)
       {
         try {
           precondition.checkArgument(options.target!=undefined || options.target!=null, 
@@ -340,7 +347,7 @@ _A model adapted from iron-request element of Google Polymer._
         } catch (e) {
           this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
         }
-      },
+      }
 
       /*
        * ### Performs an AJAX request to modify the qos of a file.
@@ -354,7 +361,7 @@ _A model adapted from iron-request element of Google Polymer._
        *      will be returned.
        *
        */
-      getqos: function(options)
+      getqos(options)
       {
         try {
           let opt = {};
@@ -364,7 +371,7 @@ _A model adapted from iron-request element of Google Polymer._
         } catch (e) {
           this.rejectPromise(new Error("Could not proceed with the request. " + e.message));
         }
-      },
+      }
 
       /**
         * Attempts to parse the response body of the XHR. If parsing succeeds,
@@ -374,11 +381,11 @@ _A model adapted from iron-request element of Google Polymer._
         * @return {*} The parsed response,
         * or undefined if there was an empty response or parsing failed.
         */
-      parseResponse: function ()
+      parseResponse()
       {
-        var xhr = this.xhr;
-        var responseType = xhr.responseType || xhr._responseType;
-        var preferResponseText = !this.xhr.responseType;
+        const xhr = this.xhr;
+        const responseType = xhr.responseType || xhr._responseType;
+        const preferResponseText = !this.xhr.responseType;
         try {
           if (preferResponseText || xhr.response === undefined) {
             try {
@@ -391,22 +398,22 @@ _A model adapted from iron-request element of Google Polymer._
         } catch (e) {
           this.rejectPromise(new Error('Could not parse response. ' + e.message));
         }
-      },
+      }
 
       /**
         * Updates the status code.
         */
-      _updateStatus: function()
+      _updateStatus()
       {
         this._setStatus(this.xhr.status);
-      },
+      }
 
       /**
         * append the file path to the url to form a full url.
         *
         * @return {String}
         */
-      _appendFullPathToUrl: function(url, path)
+      _appendFullPathToUrl(url, path)
       {
         precondition.checkArgument(url!=undefined || url!=null, "Please specify the url.");
         precondition.checkArgument(url.trim().length !==0, "The url cannot be empty.");
@@ -422,6 +429,7 @@ _A model adapted from iron-request element of Google Polymer._
         }
         return urlWithFullPath;
       }
-    });
+    }
+    customElements.define(DcacheNamespace.is, DcacheNamespace);
   </script>
 </dom-module>
