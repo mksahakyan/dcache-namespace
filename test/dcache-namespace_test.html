@@ -20,10 +20,14 @@
 
     <script>
       suite('dcache-namespace', function() {
+        let element;
+        setup(function() {
+          element = fixture('basic');
+        });
 
         test('instantiating the element works', function() {
-          var element = fixture('basic');
-          assert.equal(element.is, 'dcache-namespace');
+          ;
+          assert.equal((element.tagName).toLowerCase(), 'dcache-namespace');
         });
 
       });
