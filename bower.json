@@ -6,7 +6,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
     "promise-polyfill": "polymerlabs/promise-polyfill#^2.0.0",
-    "util-precondition": "dCacheElements/preconditionjs#*"
+    "util-precondition": "dCacheElements/preconditionjs#^0.0.4"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#3.0.1",
