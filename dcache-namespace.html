@@ -209,7 +209,7 @@ _A model adapted from iron-request element of Google Polymer._
        *    `url`: The url of dcache restful-api. 
        *
        *    `path`: (String) The full path to where the new directory  
-       *      should be created.
+       *      should be created. This must be url-encoded.
        *
        *    `name`: The name of the new directory.
        *
@@ -237,7 +237,7 @@ _A model adapted from iron-request element of Google Polymer._
        *    `url`: (String) The url with the dcache restful-api path
        *
        *    `path`: (String) The full path to where the file you want to rename or 
-       *      move is located
+       *      move is located. This must be url-encoded.
        *
        *    `destination`: (String) Specify the new name of the file or the full path 
        *      to where the file should be moved.
@@ -266,7 +266,7 @@ _A model adapted from iron-request element of Google Polymer._
        *    `url`: The url with the dcache restful-api path
        *
        *    `path`: The full path to where the file you want to delete is 
-       *      located
+       *      located. This must be url-encoded.
        */
       rm(options)
       {
@@ -287,6 +287,7 @@ _A model adapted from iron-request element of Google Polymer._
        *    `url`: (String) The url of dcache restful-api.
        *
        *    `path`: (String) The path to the file you want to get it metadata.
+       *        This must be url-encoded.
        *
        *    `children`: (Boolean) Specify whether to list the children of the specified 
        *        file path. Default to false
@@ -333,6 +334,7 @@ _A model adapted from iron-request element of Google Polymer._
        *      the file in which you want to modify is qos.
        *
        *    `path`: (String) The full path of the file that will be modified.
+       *      This must be url-encoded.
        *
        *    `target`: (String) The qos target to modify to.
        */
@@ -360,7 +362,7 @@ _A model adapted from iron-request element of Google Polymer._
        *      the file in which you want to get is current qos.
        *
        *    `path`: (String) The full path of the file that the current qos will
-       *      will be returned.
+       *      will be returned. This must be url-encoded.
        *
        */
       getqos(options)
